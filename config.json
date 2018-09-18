@@ -1,0 +1,12 @@
+{
+	"header":["title","date","desc"],
+	"links":[{
+		"url":"http://0.0.0.0:1234/index.html",
+		"container":"li[class=content]",
+		"grab":[
+			{"css":"h2[class=title]", "content":""},
+			{"css":"time", "content":"datetime"},
+			{"css":"p[class=summary]", "content":""}]
+		}
+	]
+}

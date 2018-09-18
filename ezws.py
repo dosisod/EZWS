@@ -20,8 +20,9 @@ class EZWS:
 	req    requests obj
 	raw    raw html from req.get()
 	check  check for robot files, keep true
+	output name of output csv file
 	"""
-	def __init__(self, file, ua, check=True):
+	def __init__(self, file, ua, check=True, output="output.csv"):
 		if check: #only setup robot checker if robot checking is enabled
 			self.ua=ua #user agent
 			self.robo=RobotsCache(capacity=0)
@@ -37,7 +38,11 @@ class EZWS:
 
 	def allowed(self, url): #checks if url is ok to download
 		if self.check:
-			return self.robo.allowed(url, self.ua)
+			if self.robo.allowed(url, self.ua): #checks robot file
+				return True
+			else:
+				print(url,"is not allowed") #notify user if url isnt allowed
+				return False
 		else:
 			return True #if robot checking is off, return true regardless
 
@@ -56,8 +61,22 @@ class EZWS:
 	def download(self, url):
 		if self.allowed(url):
 			self.raw=self.req.get(url).content
-			self.soup=BeautifulSoup(self.raw, "html.parser")
-			return True
-		else:
-			print("Skipping: not allowed")
-			return False
+			self.soup=BeautifulSoup(self.raw, "html.parser") #loads html into soup obj
+
+	def grab(self):
+		sc=simplecsv("output.csv", mode="w+") #using w+ mode to remove old output
+		sc.writerow(self.config["header"]) #add header from config to csv
+
+		for link in self.config["links"]:     #loop through links
+			if self.allowed(link["url"]): #check if url is allowed
+				self.download(link["url"]) #if so download it
+				for divs in self.soup.select(link["container"]):
+					row=[]
+					for get in link["grab"]: #grabs each element from inside each div
+						item=divs.select(get["css"])[0]
+						if get["content"]: #if not empty, get the element from tag
+							row.append(item[get["content"]])
+						else: #if empty, get the text from tag
+							row.append(item.text)
+					sc.writerow(row)
+		sc.close()

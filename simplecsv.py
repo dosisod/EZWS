@@ -1,9 +1,9 @@
 import csv
 
 class simplecsv:
-	def __init__(self, file=""):
+	def __init__(self, file, mode="a+"):
 		self.table=[]
-		self.f=open(file, "a+")
+		self.f=open(file, mode)
 		self.csvr=csv.reader(self.f.read())
 		self.csvw=csv.writer(self.f)
 		for row in self.csvr:
