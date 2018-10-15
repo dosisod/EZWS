@@ -32,9 +32,13 @@ class EZWS:
 		self.check=check
 		self.req=requests
 
-		if os.path.exists(file):
-			with open(file) as f:
-				self.config=json.load(f) #opens and parses json file
+		if type(file) is dict: #if file is json obj, load it
+			self.config=file
+
+		else: #assume it is a file and load it
+			if os.path.exists(file):
+				with open(file) as f:
+					self.config=json.load(f) #opens and parses json file
 
 	def allowed(self, url): #checks if url is ok to download
 		if self.check:
