@@ -32,6 +32,8 @@ class EZWS:
 		self.check=check
 		self.req=requests
 
+		self.data=[] #init array of grabbed sites
+
 		if type(file) is dict: #if file is json obj, load it
 			self.config=file
 
@@ -82,5 +84,6 @@ class EZWS:
 							row.append(item[get["content"]])
 						else: #if empty, get the text from tag
 							row.append(item.text)
+					self.data.append(row)
 					sc.writerow(row)
 		sc.close()
