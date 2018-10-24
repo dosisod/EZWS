@@ -22,15 +22,17 @@ class EZWS:
 	check  check for robot files, keep true
 	output name of output csv file
 	"""
-	def __init__(self, file, ua, check=True, output="output.csv"):
+	def __init__(self, file, ua, check=True, output="output.csv"): #setting output to false disables file output
 		if check: #only setup robot checker if robot checking is enabled
 			self.ua=ua #user agent
 			self.robo=RobotsCache(capacity=0)
 
-		#check disables or enables robots.txt checking
+		#check var disables or enables robots.txt checking
 		#recommended to keep default True value
 		self.check=check
-		self.req=requests
+		self.req=requests #request obj for parsing url
+
+		self.output=output #where to output file
 
 		self.data=[] #init array of grabbed sites
 
@@ -70,8 +72,9 @@ class EZWS:
 			self.soup=BeautifulSoup(self.raw, "html.parser") #loads html into soup obj
 
 	def grab(self):
-		sc=simplecsv("output.csv", mode="w+") #using w+ mode to remove old output
-		sc.writerow(self.config["header"]) #add header from config to csv
+		if self.output: #only create simplecsv obj if file outputting is on
+			sc=simplecsv("output.csv", mode="w+") #using w+ mode to remove old output
+			sc.writerow(self.config["header"]) #add header from config to csv
 
 		for link in self.config["links"]:     #loop through links
 			if self.allowed(link["url"]): #check if url is allowed
@@ -85,5 +88,7 @@ class EZWS:
 						else: #if empty, get the text from tag
 							row.append(item.text)
 					self.data.append(row)
-					sc.writerow(row)
-		sc.close()
+					if self.output:
+						sc.writerow(row)
+		if self.output:
+			sc.close()
