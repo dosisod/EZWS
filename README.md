@@ -10,3 +10,9 @@ Use lots of links, each one having a container tag, and CSS selectors that grab 
 Below is a simple use case that grabs blog information
 
 ![simple use case](img/using.png)
+
+# Note
+
+Until pic is changed, "content" has been changed to "contents", and requires an array of strings instead of one
+
+This allows you to grab many attributes of the same element
