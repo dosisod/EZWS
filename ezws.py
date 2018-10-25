@@ -74,20 +74,30 @@ class EZWS:
 	def grab(self):
 		if self.output: #only create simplecsv obj if file outputting is on
 			sc=simplecsv("output.csv", mode="w+") #using w+ mode to remove old output
-			sc.writerow(self.config["header"]) #add header from config to csv
+			if self.config["header"]:
+				sc.writerow(self.config["header"]) #add header from config to csv
 
 		for link in self.config["links"]:     #loop through links
 			if self.allowed(link["url"]): #check if url is allowed
 				self.download(link["url"]) #if so download it
 				for divs in self.soup.select(link["container"]):
-					row=[]
+					row=[] #reset row
 					for get in link["grab"]: #grabs each element from inside each div
-						item=divs.select(get["css"])[0]
-						if get["content"]: #if not empty, get the element from tag
-							row.append(item[get["content"]])
-						else: #if empty, get the text from tag
-							row.append(item.text)
-					self.data.append(row)
+						if self.config["header"]: #if theres a header keep data to one column
+							items=divs.select(get["css"])[:1]
+						else: #else dont care about data being in order
+							items=divs.select(get["css"])
+
+						for item in items:
+							cont=[] #arr for storing attribs from each css selected element
+							for content in get["contents"]:
+								if content: #if not empty, get the element from tag
+									cont.append(item[content])
+								else: #if empty, get the text from tag
+									cont.append(item.text)
+							row.append(cont)
+
+					self.data+=row
 					if self.output:
 						sc.writerow(row)
 		if self.output:
