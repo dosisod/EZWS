@@ -1,5 +1,5 @@
 # EZWS
-Easy Web Scraper: using CSS selectors to scrape a list of webpages
+Easy Web Scrape: using CSS selectors to scrape a list of webpages
 
 # Usage
 
