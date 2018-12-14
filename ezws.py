@@ -73,7 +73,7 @@ class EZWS:
 
 	def grab(self):
 		if self.output: #only create simplecsv obj if file outputting is on
-			sc=simplecsv("output.csv", mode="w+") #using w+ mode to remove old output
+			sc=simplecsv(self.output, mode="w+") #using w+ mode to remove old output
 			if self.config["header"]:
 				sc.writerow(self.config["header"]) #add header from config to csv
 
