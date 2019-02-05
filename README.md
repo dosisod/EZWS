@@ -10,7 +10,6 @@ Use as many different links as you want, each one having a container tag, and CS
 HTML example:
 
 ```html
-<!-- index.html -->
 <div class="contact">
 	<p class="name">Raymond King</p>
 	<p class="spacer">-----</p>
