@@ -1,18 +1,56 @@
 # EZWS
-Easy Web Scrape: using CSS selectors to scrape a list of webpages
+Easy Web Scrape: Use CSS selectors to scrape websites in python
 
 # Usage
 
-By looking at a pages HTML source, you can use CSS selectors to parse data into a csv
+By looking at the HTML structure of a webpage, you can use CSS selectors to grab the data you want
 
-Use lots of links, each one having a container tag, and CSS selectors that grab desired data from the container
+Use as many different links as you want, each one having a container tag, and CSS selectors that grab desired data from each container
 
-Below is a simple use case that grabs blog information
+HTML example:
 
-![simple use case](img/using.png)
+```html
+<!-- index.html -->
+<div class="contact">
+	<p class="name">Raymond King</p>
+	<p class="spacer">-----</p>
+	<a class="website" href="raymondking.com">raymondking.com</a>
+</div>
+<div class="contact">
+	<p class="name">Lawrence Harris</p>
+	<p class="spacer">-----</p>
+	<a class="website" href="lawrence.com">lawrence.com</a>
+</div>
+<div class="contact">
+	<p class="name">Christine Martinez</p>
+	<p class="spacer">-----</p>
+	<a class="website" href="christinephotos.io">christinephotos.io</a>
+</div>
+```
 
-# Note
+The HTML above could be scraped with json file that looks something like this:
 
-Until pic is changed, "content" has been changed to "contents", and requires an array of strings instead of one
+```javascript
+{
+    "header":["NAME","LINK","INNER"],
+	"links":[ //allows for many links, using formatting below
+		{
+			"url":"http://0.0.0.0:1234/index.html",
+			"container":"div[class=contact]", //identifier for element holding desired content
+			"grab":[
+				{"css":"p[class=name]", "contents":[""]}, //grab just the innertext ("")
+				{"css":"a", "contents":["href",""]} //grab href and innertext
+			]
+		} //more links could be added after this
+	]
+}
+```
 
-This allows you to grab many attributes of the same element
+Resulting in a CSV file like this:
+
+```
+NAME,LINK,INNER
+Raymond King,raymondking.com,raymondking.com
+Lawrence Harris,lawrence.com,lawrence.com
+Christine Martinez,christinephotos.io,christinephotos.io
+```

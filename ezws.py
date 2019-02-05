@@ -25,7 +25,7 @@ class EZWS:
 	def __init__(self, file, ua, check=True, output="output.csv"): #setting output to false disables file output
 		if check: #only setup robot checker if robot checking is enabled
 			self.ua=ua #user agent
-			self.robo=RobotsCache(capacity=0)
+			self.robo=RobotsCache(capacity=100)
 
 		#check var disables or enables robots.txt checking
 		#recommended to keep default True value
@@ -77,7 +77,7 @@ class EZWS:
 			if self.config["header"]:
 				sc.writerow(self.config["header"]) #add header from config to csv
 
-		for link in self.config["links"]:     #loop through links
+		for link in self.config["links"]: #loop through links
 			if self.allowed(link["url"]): #check if url is allowed
 				self.download(link["url"]) #if so download it
 				for divs in self.soup.select(link["container"]):
@@ -95,7 +95,7 @@ class EZWS:
 									cont.append(item[content])
 								else: #if empty, get the text from tag
 									cont.append(item.text)
-							row.append(cont)
+							row+=cont
 
 					self.data+=row #update internal data
 					if self.output:
