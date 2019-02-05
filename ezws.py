@@ -49,7 +49,7 @@ class EZWS:
 			if self.robo.allowed(url, self.ua): #checks robot file
 				return True
 			else:
-				print(url,"is not allowed") #notify user if url isnt allowed
+				print(url, "is not allowed") #notify user if url isnt allowed
 				return False
 		else:
 			return True #if robot checking is off, return true regardless
@@ -97,8 +97,8 @@ class EZWS:
 									cont.append(item.text)
 							row.append(cont)
 
-					self.data+=row
+					self.data+=row #update internal data
 					if self.output:
-						sc.writerow(row)
+						sc.writerow(row) #only write to disk if file output is on
 		if self.output:
-			sc.close()
+			sc.close() #only close "sc" if file output is on
