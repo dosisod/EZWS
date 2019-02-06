@@ -78,27 +78,34 @@ class EZWS:
 				sc.writerow(self.config["header"]) #add header from config to csv
 
 		for link in self.config["links"]: #loop through links
-			if self.allowed(link["url"]): #check if url is allowed
-				self.download(link["url"]) #if so download it
-				for divs in self.soup.select(link["container"]):
-					row=[] #reset row
-					for get in link["grab"]: #grabs each element from inside each div
-						if self.config["header"]: #if theres a header keep data to one column
-							items=divs.select(get["css"])[:1]
-						else: #else dont care about data being in order
-							items=divs.select(get["css"])
+			samelinks=[] #empty list of links for now
+			if type(link["url"]) is str:
+				samelinks.append(link["url"]) #if url is a single str not array append it to an array
+			else: #assume it is an array
+				samelinks=link["url"]
 
-						for item in items:
-							cont=[] #arr for storing attribs from each css selected element
-							for content in get["contents"]:
-								if content: #if not empty, get the element from tag
-									cont.append(item[content])
-								else: #if empty, get the text from tag
-									cont.append(item.text)
-							row+=cont
-
-					self.data+=row #update internal data
-					if self.output:
-						sc.writerow(row) #only write to disk if file output is on
+			for samelink in samelinks: #passing "url" an array of urls will do the same params on all the links
+				if self.allowed(samelink): #check if url is allowed
+					self.download(samelink) #if so download it
+					for divs in self.soup.select(link["container"]):
+						row=[] #reset row
+						for get in link["grab"]: #grabs each element from inside each div
+							if self.config["header"]: #if theres a header keep data to one column
+								items=divs.select(get["css"])[:1]
+							else: #else dont care about data being in order
+								items=divs.select(get["css"])
+	
+							for item in items:
+								cont=[] #arr for storing attribs from each css selected element
+								for content in get["contents"]:
+									if content: #if not empty, get the element from tag
+										cont.append(item[content])
+									else: #if empty, get the text from tag
+										cont.append(item.text)
+								row+=cont
+	
+						self.data+=row #update internal data
+						if self.output:
+							sc.writerow(row) #only write to disk if file output is on
 		if self.output:
 			sc.close() #only close "sc" if file output is on
