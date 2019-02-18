@@ -2,11 +2,12 @@
     "header":["NAME","LINK","INNER"],
 	"links":[
 		{
-			"url":"http://0.0.0.0:1234/index.html",
+			"url":["http://0.0.0.0:1234/index.html"],
 			"container":"div[class=contact]",
 			"grab":[
-				{"css":"p[class=name]", "contents":[""]},
-				{"css":"a", "contents":["href",""]}
+				{"css":"p", "contents":[""]},
+				{"css":"a", "contents":["href",""]},
+				{"xpath":"//p[@class=name]/text()"}
 			]
 		}
 	]

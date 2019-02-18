@@ -1,10 +1,11 @@
-from urllib.parse import urlparse   #parsing local href
 from reppy.cache import RobotsCache #caching robots.txt files
-from simplecsv import simplecsv     #for exporting data
+from urllib.parse import urlparse #parsing local href
+from lxml import html as lxmlhtml #converts html to xpath-able tree
+from simplecsv import simplecsv #for exporting data
 from bs4 import BeautifulSoup
 import requests #grabs pages
-import json     #loads url info
-import os       #check for file existence
+import json #loads url info
+import os #check for file existence
 
 class EZWS:
 	"""
@@ -71,6 +72,33 @@ class EZWS:
 			self.raw=self.req.get(url).content
 			self.soup=BeautifulSoup(self.raw, "html.parser") #loads html into soup obj
 
+	def xpath(self, html, xp): #takes html and returns data from xpath
+		tree=lxmlhtml.fromstring(html) #generates tree
+		return tree.xpath(xp) #returns data from tree
+
+	def select(self, html, obj): #determines whether to grab using css or xpath
+		if "xpath" in obj: #if xpath
+			items=self.xpath(html.getText(), obj["xpath"]) #return xpath selector arr
+		else: #css
+			items=html.select(obj["css"]) #return a css selector arr
+			
+		if self.config["header"]: #if theres a header keep data to one column
+			items=items[:1]
+
+		if "css" in obj: #if data is css attribute(s) from element
+			row=[]
+			for item in items:
+				cont=[] #arr for storing attribs from each css selected element
+				for content in obj["contents"]:
+					if content: #if not empty, get the element from tag
+						cont.append(item[content])
+					else: #if empty, get the text from tag
+						cont.append(item.text)
+				row+=cont #append attribs to attrib array
+			return row #return all the attribs (css)
+		else:
+			return items #return xpath
+
 	def grab(self):
 		if self.output: #only create simplecsv obj if file outputting is on
 			sc=simplecsv(self.output, mode="w+") #using w+ mode to remove old output
@@ -88,24 +116,12 @@ class EZWS:
 				if self.allowed(samelink): #check if url is allowed
 					self.download(samelink) #if so download it
 					for divs in self.soup.select(link["container"]):
-						row=[] #reset row
+						add=[]
 						for get in link["grab"]: #grabs each element from inside each div
-							if self.config["header"]: #if theres a header keep data to one column
-								items=divs.select(get["css"])[:1]
-							else: #else dont care about data being in order
-								items=divs.select(get["css"])
+							add+=self.select(divs, get)
 	
-							for item in items:
-								cont=[] #arr for storing attribs from each css selected element
-								for content in get["contents"]:
-									if content: #if not empty, get the element from tag
-										cont.append(item[content])
-									else: #if empty, get the text from tag
-										cont.append(item.text)
-								row+=cont
-	
-						self.data+=row #update internal data
+						self.data+=add #update internal data
 						if self.output:
-							sc.writerow(row) #only write to disk if file output is on
+							sc.writerow(add) #only write to disk if file output is on
 		if self.output:
 			sc.close() #only close "sc" if file output is on
