@@ -1,5 +1,5 @@
 # EZWS
-Easy Web Scrape: Use CSS selectors to scrape websites in python
+Easy Web Scrape: Use CSS selectors or XPATH to scrape websites in python
 
 # Usage
 
@@ -32,13 +32,17 @@ The HTML above could be scraped with json file that looks something like this:
 ```javascript
 {
     "header":["NAME","LINK","INNER"],
-	"links":[ //allows for many links, using formatting below
+	"links":[ //allows for many scraping styles, using formatting below
 		{
 			"url":"http://0.0.0.0:1234/index.html",
+			// to scrape many urls using the same params, put links in an array
+			// "url":["http://website1.com", "http://website2.com"],
+			
 			"container":"div[class=contact]", //identifier for element holding desired content
 			"grab":[
 				{"css":"p[class=name]", "contents":[""]}, //grab just the innertext ("")
 				{"css":"a", "contents":["href",""]} //grab href and innertext
+				{"xpath":"//p[@class=name]/text()"} //xpath that grabs names
 			]
 		} //more links could be added after this
 	]
