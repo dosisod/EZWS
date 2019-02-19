@@ -1,6 +1,8 @@
 # EZWS
 Easy Web Scrape: Use CSS selectors or XPATH to scrape websites in python
 
+To get started, visit the [quickstart](docs/quickstart.md) guide
+
 # Usage
 
 By looking at the HTML structure of a webpage, you can use CSS selectors to grab the data you want
