@@ -13,7 +13,6 @@ class EZWS:
 
 	config json config file
 	ua     user agent
-	txt    path to current robot file
 	robo   robotcache obj
 	link   current link
 	urlp   url parse object for current link

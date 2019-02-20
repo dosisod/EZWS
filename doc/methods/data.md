@@ -1,6 +1,6 @@
 # self.data
 
-This is a useful variable, it allows for dumping the current 2d arra of what the scraper has found
+This is a useful variable, it allows for dumping the current 2d array of what the scraper has found
 
 This is the same data that will be put into the `.csv` file if file outputting is enabled
 
