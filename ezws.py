@@ -36,13 +36,12 @@ class EZWS:
 
 		self.data=[] #init array of grabbed sites
 
-		if type(file) is dict: #if file is json obj, load it
-			self.config=file
-
-		else: #assume it is a file and load it
-			if os.path.exists(file):
-				with open(file) as f:
-					self.config=json.load(f) #opens and parses json file
+		self.configarr=[] #empty array of all configs
+		
+		if type(file) is list:
+			self.configarr=file
+		else:
+			self.configarr.append(file)
 
 	def allowed(self, url): #checks if url is ok to download
 		if self.check:
@@ -98,29 +97,44 @@ class EZWS:
 		else:
 			return items #return xpath
 
-	def grab(self):
-		if self.output: #only create simplecsv obj if file outputting is on
-			sc=simplecsv(self.output, mode="w+") #using w+ mode to remove old output
-			if self.config["header"]:
-				sc.writerow(self.config["header"]) #add header from config to csv
+	def load(self, index):
+		tmp=self.configarr[index]
+		
+		if type(tmp) is dict: #if file is json obj, load it
+			self.config=tmp
+		else: #assume it is a file and load it
+			if os.path.exists(tmp):
+				with open(tmp) as f:
+					self.config=json.load(f) #opens and parses json file
 
-		for link in self.config["links"]: #loop through links
-			samelinks=[] #empty list of links for now
-			if type(link["url"]) is str:
-				samelinks.append(link["url"]) #if url is a single str not array append it to an array
-			else: #assume it is an array
-				samelinks=link["url"]
-
-			for samelink in samelinks: #passing "url" an array of urls will do the same params on all the links
-				if self.allowed(samelink): #check if url is allowed
-					self.download(samelink) #if so download it
-					for divs in self.soup.select(link["container"]):
-						add=[]
-						for get in link["grab"]: #grabs each element from inside each div
-							add+=self.select(divs, get)
+	def grab(self, index=None):
+		if index==None: #using grab() with no params will grab all configs passed
+			for i in range(len(self.configarr)):
+				self.grab(i) #grab "i" config file
+		else:
+			self.load(index) #get current file obj
+			if self.output: #only create simplecsv obj if file outputting is on
+				sc=simplecsv(self.output, mode="w+") #using w+ mode to remove old output
+				if self.config["header"]:
+					sc.writerow(self.config["header"]) #add header from config to csv
 	
-						self.data+=add #update internal data
-						if self.output:
-							sc.writerow(add) #only write to disk if file output is on
-		if self.output:
-			sc.close() #only close "sc" if file output is on
+			for link in self.config["links"]: #loop through links
+				samelinks=[] #empty list of links for now
+				if type(link["url"]) is str:
+					samelinks.append(link["url"]) #if url is a single str not array append it to an array
+				else: #assume it is an array
+					samelinks=link["url"]
+	
+				for samelink in samelinks: #passing "url" an array of urls will do the same params on all the links
+					if self.allowed(samelink): #check if url is allowed
+						self.download(samelink) #if so download it
+						for divs in self.soup.select(link["container"]):
+							add=[]
+							for get in link["grab"]: #grabs each element from inside each div
+								add+=self.select(divs, get)
+		
+							self.data+=add #update internal data
+							if self.output:
+								sc.writerow(add) #only write to disk if file output is on
+			if self.output:
+				sc.close() #only close "sc" if file output is on
