@@ -97,6 +97,9 @@ class EZWS:
 		else:
 			return items #return xpath
 
+	def clear(self):
+		self.data=[]
+
 	def load(self, index):
 		tmp=self.configarr[index]
 		
