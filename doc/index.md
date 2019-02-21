@@ -5,5 +5,6 @@
 	* 2.2 [self.data](methods/data.md)
 	* 2.3 [self.output](methods/output.md)
 	* 2.4 [self.file](methods/file.md)
+	* 2.5 [self.grab()](methods/grab.md)
 * 3.1 [In-depth JSON](keys/index.md)
 	* 3.2 [The header key](keys/header.md)

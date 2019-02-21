@@ -22,3 +22,11 @@ ez=EZWS(json, useragent)
 ```
 
 Default is `"config.json"`
+
+File can be an array, each element being of one of the types above (string, json obj, etc)
+
+Inside this array, not all elements have to be of the same type, eg:
+
+```python
+ez=EZWS(["input.json", "other.json", json_obj], useragent)
+```

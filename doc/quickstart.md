@@ -6,6 +6,12 @@ For this demo, all examples are stored in a json file called `config.json`
 
 # Single URL, single grab
 
+To start, import EZWS:
+
+```python
+from ezws import EZWS
+```
+
 To grab one thing from one url, one could do:
 
 ```javascript
