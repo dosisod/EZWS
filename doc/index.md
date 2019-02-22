@@ -7,5 +7,6 @@
 	* 2.4 [self.file](methods/file.md)
 	* 2.5 [self.grab()](methods/grab.md)
 	* 2.6 [self.allowed()](methods/allowed.md)
-* 3.1 [In-depth JSON](keys/index.md)
-	* 3.2 [The header key](keys/header.md)
+	* 2.7 [self.clear()](methods/clear.md)
+* 3.1 [JSON configuring](keys/index.md)
+	* 3.2 ["header"](keys/header.md)

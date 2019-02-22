@@ -5,3 +5,4 @@
 * 2.4 [self.file](methods/file.md)
 * 2.5 [self.grab()](methods/grab.md)
 * 2.6 [self.allowed()](allowed.md)
+* 2.7 [self.clear()](clear.md)
