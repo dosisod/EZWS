@@ -1,4 +1,4 @@
-# Header
+# "header"
 
 The `"header"` key allows for fixed width columns, while not including this key allows for variable width columns
 

@@ -11,3 +11,4 @@
 	* 2.8 [self.___init__()](methods/init.md)
 * 3.1 [JSON configuring](keys/index.md)
 	* 3.2 ["header"](keys/header.md)
+	* 3.3 ["links"](keys/links.md)
