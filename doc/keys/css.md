@@ -31,4 +31,13 @@ To grab the innertext and the href all at once, add `"href"` to the contents:
 
 `{"css":"a", "contents":["","href"]}`
 
+If there is only one item in `"contents"` then you dont have to have it in an array
+
+The following examples are equivalent:
+
+```javascript
+{"css":"a", "contents":""}
+{"css":"a", "contents":[""]}
+```
+
 Instead of CSS selectors, you can also use [xpath](xpath.md) or a mix of both if you want

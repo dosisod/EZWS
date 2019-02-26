@@ -87,6 +87,9 @@ class EZWS:
 			row=[]
 			for item in items:
 				cont=[] #arr for storing attribs from each css selected element
+				if type(obj["contents"]) is str: #if contents is a string, put it into an array
+					obj["contents"]=[obj["contents"]]
+					
 				for content in obj["contents"]:
 					if content: #if not empty, get the element from tag
 						cont.append(item[content])
