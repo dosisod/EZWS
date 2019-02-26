@@ -15,3 +15,5 @@
 	* 3.4 ["url"](keys/url.md)
 	* 3.5 ["container"](keys/container.md)
 	* 3.6 ["grab"](keys/grab.md)
+	* 3.7 [using CSS](keys/css.md)
+	* 3.8 [using XPATH](keys/xpath.md)
