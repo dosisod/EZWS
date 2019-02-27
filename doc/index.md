@@ -9,7 +9,7 @@
 	* 2.5 [self.grab()](methods/grab.md)
 	* 2.6 [self.allowed()](methods/allowed.md)
 	* 2.7 [self.clear()](methods/clear.md)
-	* 2.8 [self.___init__()](methods/init.md)
+	* 2.8 [self.__init__()](methods/init.md)
 * 3.1 [JSON configuring](keys/index.md)
 	* 3.2 ["header"](keys/header.md)
 	* 3.3 ["links"](keys/links.md)
