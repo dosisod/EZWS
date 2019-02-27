@@ -1,6 +1,7 @@
 # Documentation Index
 
-* 1.1 [Quickstart](quickstart.md)
+* 1.1 [The Basics](basics/index.md)
+	* 1.2 [Quickstart](basics/quickstart.md)
 * 2.1 [Methods and properties](methods/index.md)
 	* 2.2 [self.data](methods/data.md)
 	* 2.3 [self.output](methods/output.md)
