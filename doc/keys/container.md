@@ -24,4 +24,4 @@ Note:
 
 `"container"` must be a CSS selector, not XPATH
 
-The ability to make this XPATH conpatible may be added in the future
+The ability to make this XPATH compatible may be added in the future
