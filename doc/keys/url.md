@@ -2,7 +2,7 @@
 
 `"url"` stores a single url or an array of urls to parse
 
-This key does inside of [links](links.md) key, eg:
+This key goes inside of [links](links.md) key, eg:
 
 ```kavascript
 "links":[
