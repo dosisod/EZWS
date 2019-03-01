@@ -8,3 +8,4 @@
 * 2.7 [self.clear()](clear.md)
 * 2.8 [self.__init__()](init.md)
 * 2.9 [self.ua](ua.md)
+* 2.10 [self.raw](methods/raw.md)

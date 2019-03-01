@@ -11,6 +11,7 @@
 	* 2.7 [self.clear()](methods/clear.md)
 	* 2.8 [self.__init__()](methods/init.md)
 	* 2.9 [self.ua](methods/ua.md)
+	* 2.10 [self.raw](methods/raw.md)
 * 3.1 [JSON configuring](keys/index.md)
 	* 3.2 ["header"](keys/header.md)
 	* 3.3 ["links"](keys/links.md)
