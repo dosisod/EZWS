@@ -9,3 +9,4 @@
 * 2.8 [self.__init__()](init.md)
 * 2.9 [self.ua](ua.md)
 * 2.10 [self.raw](raw.md)
+* 2.11 [self.check](check.md)
