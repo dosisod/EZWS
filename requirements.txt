@@ -1,0 +1,4 @@
+requests==2.18.4
+beautifulsoup4==4.8.0
+lxml==4.4.1
+reppy==0.4.13
