@@ -91,7 +91,7 @@ class EZWS:
 					obj["contents"]=[obj["contents"]]
 					
 				for content in obj["contents"]:
-					if content: #if not empty, get the element from tag
+					if content and item.has_attr(content): #if not empty and valid, get the element from tag
 						cont.append(item[content])
 					else: #if empty, get the text from tag
 						cont.append(item.text)
