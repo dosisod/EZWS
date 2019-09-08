@@ -35,11 +35,15 @@ class EZWS:
 		self.output=output #where to output file
 
 		self.data=[] #init array of grabbed sites
+		self.link=None #current link to grab
 
 		self.configarr=[] #empty array of all configs
 		
+		#if file is a list, replace configarr with file
 		if type(file) is list:
 			self.configarr=file
+
+		#if not append the one object to the configarr
 		else:
 			self.configarr.append(file)
 
@@ -47,18 +51,17 @@ class EZWS:
 		if self.check:
 			if self.robo.allowed(url, self.ua): #checks robot file
 				return True
+
 			else:
 				print(url, "is not allowed") #notify user if url isnt allowed
 				return False
+
 		else:
 			return True #if robot checking is off, return true regardless
 
 	@property #when url is called, return it
 	def url(self):
-		if hasattr(self, "link"): #handles whether self has link attribute
-			return self.link
-		else:
-			return "" #if not return empty string
+		return self.link
 
 	@url.setter #when url is set, parse it
 	def url(self, url):
@@ -74,40 +77,46 @@ class EZWS:
 		tree=lxmlhtml.fromstring(html) #generates tree
 		return tree.xpath(xp) #returns data from tree
 
-	def select(self, html, obj): #determines whether to grab using css or xpath
-		if "xpath" in obj: #if xpath
-			items=self.xpath(html.getText(), obj["xpath"]) #return xpath selector arr
-		else: #css
-			items=html.select(obj["css"]) #return a css selector arr
-			
-		if self.config["header"]: #if theres a header keep data to one column
-			items=items[:1]
+	def select(self, html, json): #determines whether to grab using css or xpath
+		if "xpath" in json: #if xpath
+			found=self.xpath(html.getText(), json["xpath"]) #return xpath selector arr
 
-		if "css" in obj: #if data is css attribute(s) from element
-			row=[]
-			for item in items:
-				cont=[] #arr for storing attribs from each css selected element
-				if type(obj["contents"]) is str: #if contents is a string, put it into an array
-					obj["contents"]=[obj["contents"]]
-					
-				for content in obj["contents"]:
+		elif "css" in json: #css
+			found=html.select(json["css"]) #return a css selector arr
+
+		if self.config["header"]: #if theres a header keep data to one column
+			found=found[:1]
+
+		if "css" in json: #if data is css attribute(s) from element
+			completed=[]
+			for item in found:
+				output=[] #arr for storing attribs from each css selected element
+				if type(json["contents"]) is str: #if contents is a string, put it into an array
+					json["contents"]=[json["contents"]]
+
+				for content in json["contents"]:
 					if content and item.has_attr(content): #if not empty and valid, get the element from tag
-						cont.append(item[content])
+						output.append(item[content])
+
 					else: #if empty, get the text from tag
-						cont.append(item.text)
-				row+=cont #append attribs to attrib array
-			return row #return all the attribs (css)
+						output.append(item.text)
+
+				completed+=output #append attribs to attrib array
+
+			return completed #return scraped data (css)
+
 		else:
-			return items #return xpath
+			return found #return scraped data (xpath)
 
 	def clear(self):
 		self.data=[]
 
 	def load(self, index):
 		tmp=self.configarr[index]
-		
+
 		if type(tmp) is dict: #if file is json obj, load it
 			self.config=tmp
+
 		else: #assume it is a file and load it
 			if os.path.exists(tmp):
 				with open(tmp) as f:
@@ -117,6 +126,7 @@ class EZWS:
 		if index==None: #using grab() with no params will grab all configs passed
 			for i in range(len(self.configarr)):
 				self.grab(i) #grab "i" config file
+
 		else:
 			self.load(index) #get current file obj
 			if self.output: #only create simplecsv obj if file outputting is on
@@ -124,23 +134,25 @@ class EZWS:
 				if self.config["header"]:
 					sc.writerow(self.config["header"]) #add header from config to csv
 	
-			for link in self.config["links"]: #loop through links
-				samelinks=[] #empty list of links for now
-				if type(link["url"]) is str:
-					samelinks.append(link["url"]) #if url is a single str not array append it to an array
+			for json in self.config["links"]: #loop through links
+				links=[] #empty list of links for now
+				if type(json["url"]) is str:
+					links.append(json["url"]) #if url is a single str not array append it to an array
+
 				else: #assume it is an array
-					samelinks=link["url"]
+					links=json["url"]
 	
-				for samelink in samelinks: #passing "url" an array of urls will do the same params on all the links
-					if self.allowed(samelink): #check if url is allowed
-						self.download(samelink) #if so download it
-						for divs in self.soup.select(link["container"]):
-							add=[]
-							for get in link["grab"]: #grabs each element from inside each div
-								add+=self.select(divs, get)
+				for link in links: #passing "url" an array of urls will do the same params on all the links
+					if self.allowed(link): #check if url is allowed
+						self.download(link) #if so download it
+
+						for divs in self.soup.select(json["container"]):
+							data=[]
+							for grab in json["grab"]: #grabs each element from inside each div
+								data+=self.select(divs, grab)
 		
-							self.data+=add #update internal data
+							self.data+=data #update internal data
 							if self.output:
-								sc.writerow(add) #only write to disk if file output is on
+								sc.writerow(data) #only write to disk if file output is on
 			if self.output:
 				sc.close() #only close "sc" if file output is on
