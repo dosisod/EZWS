@@ -2,6 +2,7 @@ from reppy.cache import RobotsCache #caching robots.txt files
 from urllib.parse import urlparse #parsing local href
 from lxml import html as lxmlhtml #converts html to xpath-able tree
 from simplecsv import simplecsv #for exporting data
+from reppy import logger as rpl #used to disable traceback in reppy
 from bs4 import BeautifulSoup
 import requests #grabs pages
 import json #loads url info
@@ -25,6 +26,7 @@ class EZWS:
 	def __init__(self, file, ua, check=True, output="output.csv"): #setting output to false disables file output
 		if check: #only setup robot checker if robot checking is enabled
 			self.ua=ua #user agent
+			rpl.setLevel("CRITICAL")
 			self.robo=RobotsCache(capacity=100)
 
 		#check var disables or enables robots.txt checking
@@ -55,7 +57,6 @@ class EZWS:
 			else:
 				print(url, "is not allowed") #notify user if url isnt allowed
 				return False
-
 		else:
 			return True #if robot checking is off, return true regardless
 
