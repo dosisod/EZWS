@@ -1,12 +1,14 @@
 from reppy.cache import RobotsCache #caching robots.txt files
 from urllib.parse import urlparse #parsing local href
 from lxml import html as lxmlhtml #converts html to xpath-able tree
-from simplecsv import simplecsv #for exporting data
 from reppy import logger as rpl #used to disable traceback in reppy
 from bs4 import BeautifulSoup
 import requests #grabs pages
 import json #loads url info
 import os #check for file existence
+
+from simplecsv import simplecsv #for exporting data
+from links import explode #for enumerating links
 
 class EZWS:
 	"""
