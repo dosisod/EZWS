@@ -1,3 +1,5 @@
+from reppy.exceptions import ConnectionException #exception for if url grabbing fails
+from reppy.cache import ReraiseExceptionPolicy #allows for re-reasing of exception
 from reppy.cache import RobotsCache #caching robots.txt files
 from urllib.parse import urlparse #parsing local href
 from lxml import html as lxmlhtml #converts html to xpath-able tree
@@ -29,7 +31,9 @@ class EZWS:
 		if check: #only setup robot checker if robot checking is enabled
 			self.ua=ua #user agent
 			rpl.setLevel("CRITICAL")
-			self.robo=RobotsCache(capacity=100)
+
+			#fixed in thanks to: seomoz/reppy/issues/116
+			self.robo=RobotsCache(capacity=100, cache_policy=ReraiseExceptionPolicy(0))
 
 		#check var disables or enables robots.txt checking
 		#recommended to keep default True value
@@ -53,11 +57,16 @@ class EZWS:
 
 	def allowed(self, url): #checks if url is ok to download
 		if self.check:
-			if self.robo.allowed(url, self.ua): #checks robot file
-				return True
+			try: #make sure there is no issue with checking file
+				if self.robo.allowed(url, self.ua): #checks robot file
+					return True
 
-			else:
-				print(url, "is not allowed") #notify user if url isnt allowed
+				else:
+					print(url, "is not allowed") #notify user if url isnt allowed
+					return False
+
+			except ConnectionException:
+				print(url, "seems to be down")
 				return False
 		else:
 			return True #if robot checking is off, return true regardless
@@ -144,7 +153,7 @@ class EZWS:
 
 				else: #assume it is an array
 					links=json["url"]
-	
+
 				for link in links: #passing "url" an array of urls will do the same params on all the links
 					if self.allowed(link): #check if url is allowed
 						self.download(link) #if so download it
