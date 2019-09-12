@@ -154,6 +154,12 @@ class EZWS:
 				else: #assume it is an array
 					links=json["url"]
 
+				done=[]
+				for link in links:
+					done+=explode(link)
+
+				links=done
+
 				for link in links: #passing "url" an array of urls will do the same params on all the links
 					if self.allowed(link): #check if url is allowed
 						self.download(link) #if so download it

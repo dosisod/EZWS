@@ -1,9 +1,11 @@
+import itertools
 import re
 
 #given a url with {{}} numbering, explode (enumerate) all possible links
 def explode(url):
 	matches=re.findall(r"\{\{[0-9]+\-[0-9]+\}\}", url)
 	splited=re.split(r"\{\{.*?\}\}", url)
+	print(matches, splited)
 
 	if matches!=[] and len(splited)>len(matches):
 		fragments=[] #2d array of each param enumeration
@@ -20,18 +22,18 @@ def explode(url):
 
 			fragments.append(current)
 
-		max=1
-		for frag in fragments: #find the number of links needed
-			max*=len(frag)
+		#create all possible combos from given lists
+		combos=list(itertools.product(*fragments))
 
 		done=[]
-		for i in range(max):
+		for combo in combos:
 			tmp=""
-			for j in range(len(fragments)):
-				#create the link and all of its needed parts
-				tmp=splited[j]+str(fragments[j][i%len(fragments[j])])
+			for index, val in enumerate(combo):
+				tmp+=splited[index]+str(val)
 
-			done.append(tmp+splited[-1])
+			tmp+=splited[-1]
+
+			done.append(tmp)
 
 		return done
 
