@@ -5,7 +5,6 @@ import re
 def explode(url):
 	matches=re.findall(r"\{\{(.[^\{\}]*?\|.*?|[0-9]+\-[0-9]+)\}\}", url)
 	splited=re.split(r"\{\{.*?\}\}", url)
-	print(matches, splited)
 
 	if matches!=[] and len(splited)>len(matches):
 		fragments=[] #2d array of each param enumeration
