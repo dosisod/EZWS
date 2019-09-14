@@ -3,7 +3,7 @@ import re
 
 #given a url with {{}} numbering, explode (enumerate) all possible links
 def explode(url):
-	matches=re.findall(r"\{\{(.[^\{\}]*?\|.*?|[0-9]+\-[0-9]+,?[0-9]+?)\}\}", url)
+	matches=re.findall(r"\{\{(.[^\{\}]*?\|.*?|[0-9]+\-[0-9]+(?:,[0-9]+)?)\}\}", url)
 	splited=re.split(r"\{\{.*?\}\}", url)
 
 	if matches!=[] and len(splited)>len(matches):
