@@ -3,7 +3,7 @@ import re
 
 #given a url with {{}} numbering, explode (enumerate) all possible links
 def explode(url):
-	matches=re.findall(r"\{\{(.[^\{\}]*?\|.*?|[0-9]+\-[0-9]+)\}\}", url)
+	matches=re.findall(r"\{\{(.[^\{\}]*?\|.*?|[0-9]+\-[0-9]+,?[0-9]+?)\}\}", url)
 	splited=re.split(r"\{\{.*?\}\}", url)
 
 	if matches!=[] and len(splited)>len(matches):
@@ -38,10 +38,19 @@ def parse(expr):
 	else: #number range representation
 		tmp=expr.split("-")
 		start=int(tmp[0])
-		end=int(tmp[1])
+		step=1
+		end=0
+
+		if "," in tmp[1]: #, indicates a step
+			tmp=tmp[1].split(",")
+			end=int(tmp[0])+1
+			step=int(tmp[1])
+
+		else:
+			end=int(tmp[1])+1
 
 		current=[]
-		for n in range(end-start):
-			current.append(start+n) #build out fragments from starting point to end
+		for n in range(start, end, step):
+			current.append(n) #build out fragments from starting point to end (with step if given)
 
 		return current
