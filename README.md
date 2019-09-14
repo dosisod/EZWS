@@ -37,8 +37,13 @@ The HTML above could be scraped with json file that looks something like this:
 	"links":[ //allows for many scraping styles, using formatting below
 		{
 			"url":"http://0.0.0.0:1234/index.html",
-			// to scrape many urls using the same params, put links in an array
+			// to scrape many urls using the same params, put links in an array:
 			// "url":["http://website1.com", "http://website2.com"],
+			//
+			// to scrape urls based off a template url, use {{}} syntaxing
+			// "url":"http://example.com/page{{0-100}}.html",
+			// ubove grabs "example.com/page0.html" to "example.com/page100.html"
+
 			
 			"container":"div[class=contact]", //identifier for element holding desired content
 			"grab":[
