@@ -9,8 +9,8 @@ import requests #grabs pages
 import json #loads url info
 import os #check for file existence
 
-from simplecsv import simplecsv #for exporting data
-from links import explode #for enumerating links
+from ezws.simplecsv import simplecsv #for exporting data
+from ezws.links import explode #for enumerating links
 
 class EZWS:
 	"""

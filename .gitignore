@@ -1,2 +1,2 @@
-output.csv
-*.swp
+*__pycache__/
+.venv/

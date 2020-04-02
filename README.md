@@ -1,4 +1,5 @@
 # EZWS
+
 Easy Web Scrape: Use CSS selectors or XPATH to scrape websites in python
 
 To get started, visit the [quickstart](doc/basics/quickstart.md) guide
@@ -13,19 +14,19 @@ HTML example:
 
 ```html
 <div class="contact">
-	<p class="name">Raymond King</p>
-	<p class="spacer">-----</p>
-	<a class="website" href="raymondking.com">raymondking.com</a>
+  <p class="name">Raymond King</p>
+  <p class="spacer">-----</p>
+  <a class="website" href="raymondking.com">raymondking.com</a>
 </div>
 <div class="contact">
-	<p class="name">Lawrence Harris</p>
-	<p class="spacer">-----</p>
-	<a class="website" href="lawrence.com">lawrence.com</a>
+  <p class="name">Lawrence Harris</p>
+  <p class="spacer">-----</p>
+  <a class="website" href="lawrence.com">lawrence.com</a>
 </div>
 <div class="contact">
-	<p class="name">Christine Martinez</p>
-	<p class="spacer">-----</p>
-	<a class="website" href="christinephotos.io">christinephotos.io</a>
+  <p class="name">Christine Martinez</p>
+  <p class="spacer">-----</p>
+  <a class="website" href="christinephotos.io">christinephotos.io</a>
 </div>
 ```
 
@@ -33,26 +34,25 @@ The HTML above could be scraped with json file that looks something like this:
 
 ```javascript
 {
-    "header":["NAME","LINK","INNER"],
-	"links":[ //allows for many scraping styles, using formatting below
-		{
-			"url":"http://0.0.0.0:1234/index.html",
-			// to scrape many urls using the same params, put links in an array:
-			// "url":["http://website1.com", "http://website2.com"],
-			//
-			// to scrape urls based off a template url, use {{}} syntaxing
-			// "url":"http://example.com/page{{0-100}}.html",
-			// ubove grabs "example.com/page0.html" to "example.com/page100.html"
+  "header":["NAME","LINK","INNER"],
+  "links":[ //allows for many scraping styles, using formatting below
+    {
+      "url":"http://0.0.0.0:1234/index.html",
+      // to scrape many urls using the same params, put links in an array:
+      // "url":["http://website1.com", "http://website2.com"],
+      //
+      // to scrape urls based off a template url, use {{}} syntaxing
+      // "url":"http://example.com/page{{0-100}}.html",
+      // ubove grabs "example.com/page0.html" to "example.com/page100.html"
 
-			
-			"container":"div[class=contact]", //identifier for element holding desired content
-			"grab":[
-				{"css":"p[class=name]", "contents":[""]}, //grab just the innertext ("")
-				{"css":"a", "contents":["href",""]} //grab href and innertext
-				{"xpath":"//p[@class=name]/text()"} //xpath that grabs names
-			]
-		} //more links could be added after this
-	]
+      "container":"div[class=contact]", //identifier for element holding desired content
+      "grab":[
+        {"css":"p[class=name]", "contents":[""]}, //grab just the innertext ("")
+        {"css":"a", "contents":["href",""]} //grab href and innertext
+        {"xpath":"//p[@class=name]/text()"} //xpath that grabs names
+      ]
+    } //more links could be added after this
+  ]
 }
 ```
 

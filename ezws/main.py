@@ -1,4 +1,4 @@
-from ezws import EZWS
+from ezws.ezws import EZWS
 
 def main():
 	ez=EZWS("config.json", "bot")
