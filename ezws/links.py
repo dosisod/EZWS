@@ -1,24 +1,19 @@
 import itertools
 import re
 
+from typing import List
+
 #given a url with {{}} numbering, explode (enumerate) all possible links
-def explode(url):
+def explode(url: str) -> List[str]:
 	matches=re.findall(r"\{\{(.[^\{\}]*?\|.*?|[0-9]+\-[0-9]+(?:,[0-9]+)?)\}\}", url)
 	splited=re.split(r"\{\{.*?\}\}", url)
 
-	if matches!=[] and len(splited)>len(matches):
-		fragments=[] #2d array of each param enumeration
-		for param in matches:
-			fragments.append(parse(param))
-
-		#create all possible combos from given lists
-		combos=list(itertools.product(*fragments))
-
+	if matches!=[] and len(splited) > len(matches):
 		done=[]
-		for combo in combos:
+		for combo in itertools.product(*[parse(p) for p in matches]):
 			tmp=""
 			for index, val in enumerate(combo):
-				tmp+=splited[index]+str(val)
+				tmp+=splited[index] + val
 
 			tmp+=splited[-1]
 
@@ -26,31 +21,19 @@ def explode(url):
 
 		return done
 
-	else:
-		#url is not syntaxed, put it in an arrya then return it
-		return [url]
+	#url is not syntaxed, put it in an array then return it
+	return [url]
 
-#given a single {{}} expression, auto identify the possible combos
-def parse(expr):
-	if "|" in expr: #string array representation
+def parse(expr: str) -> List[str]:
+	if "|" in expr:
 		return expr.split("|")
 
-	else: #number range representation
-		tmp=expr.split("-")
-		start=int(tmp[0])
-		step=1
-		end=0
+	#parse expr into start, end, step vars
+	num=expr.split("-")
+	num[1]=num[1].split(",") # type: ignore
 
-		if "," in tmp[1]: #, indicates a step
-			tmp=tmp[1].split(",")
-			end=int(tmp[0])+1
-			step=int(tmp[1])
-
-		else:
-			end=int(tmp[1])+1
-
-		current=[]
-		for n in range(start, end, step):
-			current.append(n) #build out fragments from starting point to end (with step if given)
-
-		return current
+	return [str(n) for n in range(
+		int(num[0]),
+		int(num[1][0]),
+		1 if len(num[1])==1 else int(num[1][1])
+	)]

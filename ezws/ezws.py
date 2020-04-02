@@ -1,16 +1,17 @@
-from reppy.exceptions import ConnectionException #exception for if url grabbing fails
-from reppy.cache import ReraiseExceptionPolicy #allows for re-reasing of exception
-from reppy.cache import RobotsCache #caching robots.txt files
-from urllib.parse import urlparse #parsing local href
-from lxml import html as lxmlhtml #converts html to xpath-able tree
-from reppy import logger as rpl #used to disable traceback in reppy
-from bs4 import BeautifulSoup
-import requests #grabs pages
-import json #loads url info
-import os #check for file existence
+from reppy.cache import ReraiseExceptionPolicy, RobotsCache # type: ignore
+from reppy.exceptions import ConnectionException # type: ignore
+from urllib.parse import urlparse
+from lxml import html as lxmlhtml # type: ignore
+from bs4 import BeautifulSoup # type: ignore
+import requests
+import reppy # type: ignore
+import json
+import os
 
-from ezws.simplecsv import simplecsv #for exporting data
-from ezws.links import explode #for enumerating links
+from ezws.simplecsv import simplecsv
+from ezws.links import explode
+
+from typing import Optional, List, Any, Dict, Union, cast
 
 class EZWS:
 	"""
@@ -27,150 +28,148 @@ class EZWS:
 	check  check for robot files, keep true
 	output name of output csv file
 	"""
-	def __init__(self, file, ua, check=True, output="output.csv"): #setting output to false disables file output
-		if check: #only setup robot checker if robot checking is enabled
-			self.ua=ua #user agent
-			rpl.setLevel("CRITICAL")
+	def __init__(self, file: Union[str, Dict], ua: str, check: bool=True, output: str="output.csv") -> None:
+		if check:
+			self.ua=ua
 
-			#fixed in thanks to: seomoz/reppy/issues/116
+			reppy.logger.setLevel("CRITICAL")
 			self.robo=RobotsCache(capacity=100, cache_policy=ReraiseExceptionPolicy(0))
 
-		#check var disables or enables robots.txt checking
-		#recommended to keep default True value
 		self.check=check
-		self.req=requests #request obj for parsing url
+		self.req=requests
 
-		self.output=output #where to output file
+		#setting output to false disables file output
+		self.output=output
 
-		self.data=[] #init array of grabbed sites
-		self.link=None #current link to grab
+		self.data: List[str]=[]
+		self.link=""
 
-		self.configarr=[] #empty array of all configs
-		
-		#if file is a list, replace configarr with file
-		if type(file) is list:
-			self.configarr=file
+		self.configarr=file if type(file) is list else [file]
 
-		#if not append the one object to the configarr
-		else:
-			self.configarr.append(file)
+	def allowed(self, url: str) -> bool:
+		if not self.check:
+			return True
 
-	def allowed(self, url): #checks if url is ok to download
-		if self.check:
-			try: #make sure there is no issue with checking file
-				if self.robo.allowed(url, self.ua): #checks robot file
-					return True
+		try:
+			if self.robo.allowed(url, self.ua):
+				return True
+			print(url, "is not allowed")
 
-				else:
-					print(url, "is not allowed") #notify user if url isnt allowed
-					return False
+		except ConnectionException:
+			print(url, "seems to be down")
 
-			except ConnectionException:
-				print(url, "seems to be down")
-				return False
-		else:
-			return True #if robot checking is off, return true regardless
+		return False
 
-	@property #when url is called, return it
-	def url(self):
+	@property
+	def url(self) -> str:
 		return self.link
 
-	@url.setter #when url is set, parse it
-	def url(self, url):
+	@url.setter
+	def url(self, url: str) -> None:
 		self.link=url
 		self.urlp=urlparse(url)
 
-	def download(self, url):
+	def download(self, url: str) -> None:
 		if self.allowed(url):
 			self.raw=self.req.get(url).content
-			self.soup=BeautifulSoup(self.raw, "html.parser") #loads html into soup obj
+			self.soup=BeautifulSoup(self.raw, "html.parser")
 
-	def xpath(self, html, xp): #takes html and returns data from xpath
-		tree=lxmlhtml.fromstring(html) #generates tree
-		return tree.xpath(xp) #returns data from tree
+	def xpath(self, html: str, xp: str) -> List[Any]:
+		return cast(List[Any], lxmlhtml.fromstring(html).xpath(xp))
 
-	def select(self, html, json): #determines whether to grab using css or xpath
-		if "xpath" in json: #if xpath
-			found=self.xpath(html.getText(), json["xpath"]) #return xpath selector arr
+	def select(self, html: Any, json: Dict) -> List[str]:
+		xpath=json.get("xpath", "")
+		css=json.get("css", "")
 
-		elif "css" in json: #css
-			found=html.select(json["css"]) #return a css selector arr
+		if xpath:
+			found=self.xpath(html.getText(), xpath)
 
-		if self.config["header"]: #if theres a header keep data to one column
-			found=found[:1]
+		elif css:
+			found=html.select(css)
 
-		if "css" in json: #if data is css attribute(s) from element
+		if self.config["header"]:
+			found=[found[0]]
+
+		if css:
 			completed=[]
 			for item in found:
-				output=[] #arr for storing attribs from each css selected element
-				if type(json["contents"]) is str: #if contents is a string, put it into an array
-					json["contents"]=[json["contents"]]
+				output=[]
 
-				for content in json["contents"]:
-					if content and item.has_attr(content): #if not empty and valid, get the element from tag
+				contents=json["contents"]
+				if type(contents) is str:
+					contents=[contents]
+
+				for content in contents:
+					if content and item.has_attr(content):
 						output.append(item[content])
 
-					else: #if empty, get the text from tag
+					else:
 						output.append(item.text)
 
-				completed+=output #append attribs to attrib array
+				completed+=output
 
-			return completed #return scraped data (css)
+			return completed
 
-		else:
-			return found #return scraped data (xpath)
+		return found
 
-	def clear(self):
+	def clear(self) -> None:
 		self.data=[]
 
-	def load(self, index):
-		tmp=self.configarr[index]
+	def load(self, index: int) -> None:
+		config=self.configarr[index]
 
-		if type(tmp) is dict: #if file is json obj, load it
-			self.config=tmp
-
-		else: #assume it is a file and load it
-			if os.path.exists(tmp):
-				with open(tmp) as f:
-					self.config=json.load(f) #opens and parses json file
-
-	def grab(self, index=None):
-		if index==None: #using grab() with no params will grab all configs passed
-			for i in range(len(self.configarr)):
-				self.grab(i) #grab "i" config file
+		if isinstance(config, Dict):
+			self.config=config
 
 		else:
-			self.load(index) #get current file obj
-			if self.output: #only create simplecsv obj if file outputting is on
-				sc=simplecsv(self.output, mode="w+") #using w+ mode to remove old output
-				if self.config["header"]:
-					sc.writerow(self.config["header"]) #add header from config to csv
-	
-			for json in self.config["links"]: #loop through links
-				links=[] #empty list of links for now
-				if type(json["url"]) is str:
-					links.append(json["url"]) #if url is a single str not array append it to an array
+			if os.path.exists(config):
+				with open(config) as f:
+					self.config=json.load(f)
 
-				else: #assume it is an array
-					links=json["url"]
+		return None
 
-				done=[]
-				for link in links:
-					done+=explode(link)
+	def grab(self, index: Optional[int]=None) -> None:
+		if index is None:
+			#using grab() with no params will grab all configs passed
+			for i in range(len(self.configarr)):
+				self.grab(i)
 
-				links=done
+			return None
 
-				for link in links: #passing "url" an array of urls will do the same params on all the links
-					if self.allowed(link): #check if url is allowed
-						self.download(link) #if so download it
+		self.load(index)
+		if self.output:
+			sc=simplecsv(self.output, mode="w+")
+			if self.config["header"]:
+				sc.writerow(self.config["header"])
 
-						for divs in self.soup.select(json["container"]):
-							data=[]
-							for grab in json["grab"]: #grabs each element from inside each div
-								data+=self.select(divs, grab)
-		
-							self.data+=data #update internal data
-							if self.output:
-								sc.writerow(data) #only write to disk if file output is on
-			if self.output:
-				sc.close() #only close "sc" if file output is on
+		for json in self.config["links"]:
+			links=[]
+			if type(json["url"]) is str:
+				links.append(json["url"])
+
+			else:
+				links=json["url"]
+
+			done=[]
+			for link in links:
+				done+=explode(link)
+
+			links=done
+
+			for link in links:
+				if not self.allowed(link):
+					return None
+
+				self.download(link)
+
+				for divs in self.soup.select(json["container"]):
+					data=[]
+					for grab in json["grab"]:
+						data+=self.select(divs, grab)
+
+					self.data+=data
+					if self.output:
+						sc.writerow(data)
+
+		if self.output:
+			sc.close()

@@ -1,6 +1,6 @@
 from ezws.ezws import EZWS
 
-def main():
+def main() -> None:
 	ez=EZWS("config.json", "bot")
 	ez.grab()
 	print(ez.data)
