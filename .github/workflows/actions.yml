@@ -1,0 +1,24 @@
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install from pip
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r test-requirements.txt
+    - name: Run test suite for python ${{ matrix.python-vesion }}
+      run: |
+        vulture ezws whitelist.py
+        mypy ezws

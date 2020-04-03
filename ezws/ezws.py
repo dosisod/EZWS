@@ -1,50 +1,43 @@
+from typing import Optional, List, Any, Dict, Union, TypeVar, cast
 from reppy.cache import ReraiseExceptionPolicy, RobotsCache # type: ignore
 from reppy.exceptions import ConnectionException # type: ignore
-from urllib.parse import urlparse
 from lxml import html as lxmlhtml # type: ignore
 from bs4 import BeautifulSoup # type: ignore
+from itertools import chain
 import requests
-import reppy # type: ignore
 import json
 import os
 
 from ezws.simplecsv import simplecsv
 from ezws.links import explode
 
-from typing import Optional, List, Any, Dict, Union, cast
+import reppy # type: ignore
+reppy.logger.setLevel("CRITICAL")
 
 class EZWS:
+	robo=RobotsCache(capacity=100, cache_policy=ReraiseExceptionPolicy(0))
+	data: List[str]=[]
+
 	"""
 	SELF:
 
 	config json config file
 	ua     user agent
 	robo   robotcache obj
-	link   current link
-	urlp   url parse object for current link
 	soup   current html page soup obj
-	req    requests obj
 	raw    raw html from req.get()
 	check  check for robot files, keep true
 	output name of output csv file
 	"""
-	def __init__(self, file: Union[str, Dict], ua: str, check: bool=True, output: str="output.csv") -> None:
-		if check:
-			self.ua=ua
-
-			reppy.logger.setLevel("CRITICAL")
-			self.robo=RobotsCache(capacity=100, cache_policy=ReraiseExceptionPolicy(0))
+	def __init__(self, file: Union[str, Dict], ua: str="", check: bool=True, output: str="output.csv") -> None:
+		self.ua=ua
 
 		self.check=check
-		self.req=requests
 
 		#setting output to false disables file output
 		self.output=output
 
-		self.data: List[str]=[]
-		self.link=""
-
-		self.configarr=file if type(file) is list else [file]
+		self.configarr=_listify(file)
 
 	def allowed(self, url: str) -> bool:
 		if not self.check:
@@ -60,19 +53,13 @@ class EZWS:
 
 		return False
 
-	@property
-	def url(self) -> str:
-		return self.link
+	def download(self, url: str) -> Optional[Any]:
+		if not self.allowed(url):
+			return None
 
-	@url.setter
-	def url(self, url: str) -> None:
-		self.link=url
-		self.urlp=urlparse(url)
+		self.raw=requests.get(url).content
 
-	def download(self, url: str) -> None:
-		if self.allowed(url):
-			self.raw=self.req.get(url).content
-			self.soup=BeautifulSoup(self.raw, "html.parser")
+		return BeautifulSoup(self.raw, "html.parser")
 
 	def xpath(self, html: str, xp: str) -> List[Any]:
 		return cast(List[Any], lxmlhtml.fromstring(html).xpath(xp))
@@ -84,33 +71,29 @@ class EZWS:
 		if xpath:
 			found=self.xpath(html.getText(), xpath)
 
-		elif css:
-			found=html.select(css)
+			return [found[0]] if self.config["header"] else found
 
+		#assume css was passed
+		found=html.select(css)
 		if self.config["header"]:
 			found=[found[0]]
 
-		if css:
-			completed=[]
-			for item in found:
-				output=[]
+		completed=[]
+		for item in found:
+			output=[]
 
-				contents=json["contents"]
-				if type(contents) is str:
-					contents=[contents]
+			contents=_listify(json["contents"])
 
-				for content in contents:
-					if content and item.has_attr(content):
-						output.append(item[content])
+			for content in contents:
+				if content and item.has_attr(content):
+					output.append(item[content])
 
-					else:
-						output.append(item.text)
+				else:
+					output.append(item.text)
 
-				completed+=output
+			completed+=output
 
-			return completed
-
-		return found
+		return completed
 
 	def clear(self) -> None:
 		self.data=[]
@@ -143,26 +126,16 @@ class EZWS:
 				sc.writerow(self.config["header"])
 
 		for json in self.config["links"]:
-			links=[]
-			if type(json["url"]) is str:
-				links.append(json["url"])
-
-			else:
-				links=json["url"]
-
-			done=[]
-			for link in links:
-				done+=explode(link)
-
-			links=done
-
-			for link in links:
+			for link in chain(*[ explode(link) for link in _listify(json["urls"]) ]):
 				if not self.allowed(link):
 					return None
 
-				self.download(link)
+				soup=self.download(link)
+				if not soup:
+					print("could not download file")
+					return None
 
-				for divs in self.soup.select(json["container"]):
+				for divs in soup.select(json["container"]):
 					data=[]
 					for grab in json["grab"]:
 						data+=self.select(divs, grab)
@@ -173,3 +146,10 @@ class EZWS:
 
 		if self.output:
 			sc.close()
+
+T=TypeVar("T")
+def _listify(obj: T) -> List[T]:
+	if isinstance(obj, List):
+		return obj
+
+	return [obj]
